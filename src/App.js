@@ -9,6 +9,7 @@ function App() {
   const [startdate, setStartDate] = useState('2023-02-23');
   const [enddate, setEndDate] = useState('2023-03-29');
   const [events, setEvents] = useState([]);
+  const [city, setCity] = useState('Hollywood');
 
   // initial shows display
 
@@ -43,16 +44,26 @@ function App() {
 
   const searchShows = async (search, location) => {
     const response = await fetch(
-      `https://app.ticketmaster.com/discovery/v2/events.json?classificationName=music&keyword=${search}&geoPoint=${location}&radius=100&startDateTime=${startdate}T00:00:00Z&endDateTime=${enddate}T00:00:00Z&apikey=${process.env.REACT_APP_TICKETMASTER_KEY}`
+      `https://app.ticketmaster.com/discovery/v2/events.json?classificationName=music&keyword=${search}&${
+        city ? `city=${city}` : `geoPoint=${location}&radius=100&`
+      }&startDateTime=${startdate}T00:00:00Z&endDateTime=${enddate}T00:00:00Z&apikey=${
+        process.env.REACT_APP_TICKETMASTER_KEY
+      }`
     );
     const result = await response.json();
-    console.log(result._embedded.events);
+    try {
+      setEvents(result._embedded.events);
+    } catch (err) {
+      alert('Try searching for another artist');
+    }
+    console.log(city);
   };
 
   return (
     <div className="App">
       <div className="search">
         <input
+          className="query"
           type="text"
           placeholder="Search for artist..."
           onChange={(e) => setSearch(e.target.value)}
@@ -73,8 +84,16 @@ function App() {
             onChange={(e) => setEndDate(e.target.value)}
           />
         </div>
-        <button onClick={locate}>Find my City</button>
-        <button onClick={() => searchShows(search, location)}>Search</button>
+        <div className="locator">
+          <button className='citybtn' onClick={locate}>Find my City 📍</button>
+          <input
+            className='city'
+            type="text"
+            placeholder="Enter a city.."
+            onChange={(e) => setCity(e.target.value.replace(' ', '%20'))}
+          />
+        </div>
+        <button className='searchbtn' onClick={() => searchShows(search, location)}>Search</button>
       </div>
       <div className="results">
         {events.map((event) => {
@@ -84,7 +103,6 @@ function App() {
               image={event.images[0].url}
               date={event.dates.start.localDate}
               time={event.dates.start.localTime}
-              artist={event._embedded.attractions[0].name}
               url={event.url}
               key={event.id}
             />
