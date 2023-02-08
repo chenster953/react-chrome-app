@@ -10,6 +10,7 @@ function App() {
   const [enddate, setEndDate] = useState('2023-03-29');
   const [events, setEvents] = useState([]);
   const [city, setCity] = useState('Hollywood');
+  const [currentCity, setCurrentCity] = useState('')
 
   // initial shows display
 
@@ -31,6 +32,12 @@ function App() {
 
   const res = (position) => {
     setLocation(`${position.coords.latitude},${position.coords.longitude}`);
+    const findCity = async () =>{
+      const response = await fetch (`http://api.openweathermap.org/geo/1.0/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&limit=5&appid=${process.env.REACT_APP_OPENWEATHER_KEY}`);
+      const data = await response.json();
+      setCurrentCity(data[0].name)
+    }
+    findCity();
   };
   const rej = () => {
     alert('Cannot get location');
@@ -56,7 +63,6 @@ function App() {
     } catch (err) {
       alert('Try searching for another artist');
     }
-    console.log(city);
   };
 
   return (
@@ -89,7 +95,7 @@ function App() {
           <input
             className='city'
             type="text"
-            placeholder="Enter a city.."
+            placeholder={currentCity !== '' ? currentCity : "Enter a city.."}
             onChange={(e) => setCity(e.target.value.replace(' ', '%20'))}
           />
         </div>
@@ -103,6 +109,9 @@ function App() {
               image={event.images[0].url}
               date={event.dates.start.localDate}
               time={event.dates.start.localTime}
+              latitude={event._embedded.venues[0].location.latitude}
+              longitude={event._embedded.venues[0].location.longitude}
+              location={event._embedded.venues[0].name}
               url={event.url}
               key={event.id}
             />
