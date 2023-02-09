@@ -1,20 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './showcard.css';
+import { MapContainer, TileLayer, useMap, Marker, Popup } from 'react-leaflet';
 
 const ShowCard = (props) => {
+  const [viewMap, setViewMap] = useState(false);
+  const [show, setShow] = useState('Show');
+
   const month = props.date.slice(5, 7);
   const day = props.date.slice(8);
   const year = props.date.slice(0, 4);
   const hours = parseInt(props.time.slice(0, 2)) % 12;
   const minutes = props.time.slice(3, 5);
 
-  const getlocation = async () => {
-    const response = await fetch(
-      `https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf624835cf2d0ecf3441a88692bbf87989d12e&start=8.681495,49.41461&end=8.687872,49.420318`
-    );
-    const data = await response.json();
-    console.log(data);
-  };
+  const toggleDirections = () => {
+    setViewMap(!viewMap);
+    show === 'Show' ? setShow('Hide') : setShow('Show');
+  }
 
   return (
     <div className="showcard">
@@ -28,7 +29,18 @@ const ShowCard = (props) => {
       <a href={props.url} target="_blank" rel="noreferrer">
         Buy Tickets!
       </a>
-      <button onClick={getlocation}>click</button>
+      <button onClick={toggleDirections} className='directionsbtn'>{show} Directions</button>
+      {viewMap ? <MapContainer
+        center={[props.latitude, props.longitude]}
+        zoom={13}
+        scrollWheelZoom={true}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <Marker position={[props.latitude, props.longitude]}></Marker>
+      </MapContainer> : ''}
     </div>
   );
 };
