@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './showcard.css';
-import { MapContainer, TileLayer, useMap, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 
 const ShowCard = (props) => {
   const [viewMap, setViewMap] = useState(false);
@@ -15,12 +15,12 @@ const ShowCard = (props) => {
   const toggleDirections = () => {
     setViewMap(!viewMap);
     show === 'Show' ? setShow('Hide') : setShow('Show');
-  }
+  };
 
   return (
     <div className="showcard">
       <h1>{props.title}</h1>
-      <img src={props.image} alt={props.title} />
+      <img className='showcardimg' src={props.image} alt={props.title} />
       <p>
         {month}/{day}/{year} at{' '}
         {minutes === '00' ? `${hours} PM` : `${hours}:${minutes} PM`}
@@ -29,18 +29,26 @@ const ShowCard = (props) => {
       <a href={props.url} target="_blank" rel="noreferrer">
         Buy Tickets!
       </a>
-      <button onClick={toggleDirections} className='directionsbtn'>{show} Directions</button>
-      {viewMap ? <MapContainer
-        center={[props.latitude, props.longitude]}
-        zoom={13}
-        scrollWheelZoom={true}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <Marker position={[props.latitude, props.longitude]}></Marker>
-      </MapContainer> : ''}
+      <button onClick={toggleDirections} className="directionsbtn">
+        {show} Location
+      </button>
+      {viewMap ? (
+        <MapContainer
+          center={[props.latitude, props.longitude]}
+          zoom={13}
+          scrollWheelZoom={true}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <Marker position={[props.latitude, props.longitude]}>
+            <Popup>{props.address}</Popup>
+          </Marker>
+        </MapContainer>
+      ) : (
+        ''
+      )}
     </div>
   );
 };
